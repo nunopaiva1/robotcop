@@ -1070,10 +1070,9 @@ async def jobs(ctx):
 
     save_jobs()
 
-client.run('MTE2ODYwOTM2MTc4NzEwNTMzMg.G-vDGu.BfXnY9I6l54w-JLRak-rzRwNF3usA1lfIVPrug')
+#client.run('MY_AWESOME_TOKEN_IS_HIDDEN_HEHE')
 
 #remindat @person
-
 #contador quantas vezes o rook diz qual é este mapa?!
 
 
