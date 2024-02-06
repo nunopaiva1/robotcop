@@ -19,4 +19,7 @@ Sounds good. Use this link!
 
 ## 🔧 Contribute 🔧
 
-Feel free to contribute either with ideas, suggestions or even your own code.
+Feel free to contribute either with ideas, suggestions or even your **own code**.
+
+    git clone https://github.com/nunopaiva1/robotcop.git
+To test me out you'll need to use a **token** on the ``main.py``file (*there's a commented line on the bottom of the script*). You can create your own token for testing purposes at [Discord Developer Portal](https://discord.com/developers/applications).
