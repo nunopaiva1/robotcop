@@ -18,6 +18,11 @@ import os
 import datetime
 from datetime import timedelta
 import re
+from dotenv import load_dotenv
+
+load_dotenv()
+TOKEN = os.getenv('DISCORD_TOKEN')
+
 #from chatterbot import ChatBot
 #from chatterbot.trainers import ListTrainer
 
@@ -157,7 +162,7 @@ def save_data(file_name, data):
 #                    OPEN WEATHER
 #---------------********************-------------------
 
-api_key = '67051b75cbc62f95bfa79d64ffb2d4ce'
+api_key = os.getenv('WEATHER_TOKEN')
 
 def get_weather(location):
     city_id = location
@@ -1070,12 +1075,9 @@ async def jobs(ctx):
 
     save_jobs()
 
-client.run('MTE2ODYwOTM2MTc4NzEwNTMzMg.G-vDGu.BfXnY9I6l54w-JLRak-rzRwNF3usA1lfIVPrug')
+client.run(TOKEN)
 
 #remindat @person
-
 #contador quantas vezes o rook diz qual é este mapa?!
-
-
 
 

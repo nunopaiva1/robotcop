@@ -1,2 +1,0 @@
-# robotcop
-Discord Bot (RobotCOP)
