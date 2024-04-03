@@ -291,7 +291,7 @@ async def on_ready():
 @client.event
 async def on_member_join(member):
     channel = client.get_channel(419573473380270082)
-    await channel.send("Welcome friend :nunuL:")
+    await channel.send(f"**Another one bites the dust. Farewell, {member.name}!** :nunuL:")
 
 @client.event
 async def on_member_remove(member):
