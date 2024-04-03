@@ -13,7 +13,7 @@ import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.jobstores.base import JobLookupError
-#import openai
+import openai
 import os
 import datetime
 from datetime import timedelta
@@ -22,6 +22,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+openai.api_key = os.getenv('OPENAI_TOKEN')
 
 #from chatterbot import ChatBot
 #from chatterbot.trainers import ListTrainer
@@ -295,7 +296,7 @@ async def on_member_join(member):
 @client.event
 async def on_member_remove(member):
     channel = client.get_channel(419573473380270082)
-    await channel.send("*Moment of Silence*")
+    await channel.send(f"**Another one bites the dust. Farewell, {member.name}!**")
 
 @client.event
 async def on_message(message):
@@ -328,6 +329,29 @@ async def on_message(message):
             response = f"{keyword} really? Why don't you {random_data['activity'].lower()} instead?"
             await message.channel.send(response)
     
+    elif message.channel.id == 1194760253049425930:  # Replace with your actual channel ID
+        history = await message.channel.history(limit=5).flatten()  # Adjust limit as needed
+
+        # Concatenate previous messages with the current prompt
+        prompt = "\n".join([msg.content for msg in history]) + "\n" + message.content
+
+        try:
+            # Use OpenAI API to generate response
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",  # You can use any GPT-3.5 model here
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+
+            # Extract the response from the API's output
+            bot_reply = response.choices[0].message['content']
+
+            # Send the generated response back to the chat
+            await message.channel.send(bot_reply)
+
+        except Exception as e:
+            print("Error:", e)
     #elif any(thankword in message.content for thankword in keywords_thanks):
         #await message.channel.send(chatbot.get_response(message.content))
 
