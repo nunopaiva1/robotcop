@@ -247,31 +247,43 @@ def get_randommsg():
 #                   TORRENT MAIN
 #---------------********************-------------------
 
-torrenturl = "http://torrents-csv.com/service/search?q={query}&size={num_results}&page={page}"
+# Corrected API URL
+torrenturl = "https://torrents-csv.com/service/search?q={query}&size={num_results}&after={after}"
 
-# Function to get torrent data from the API
-def get_torrents(query, num_results=5, page=1):
-    url = torrenturl.format(query=query, num_results=num_results, page=page)
+def get_torrents(query, num_results=5, after=0):
+    url = torrenturl.format(query=query, num_results=num_results, after=after)
     torrent_response = requests.get(url)
-    torrent_data = json.loads(torrent_response.text)
+
+    # Print the raw response for debugging
+    print(f"API Response: {torrent_response.text}")
+
+    # Ensure the response is parsed correctly
+    if torrent_response.status_code != 200:
+        raise Exception(f"Error fetching torrents: {torrent_response.status_code}, {torrent_response.text}")
+    
+    torrent_data = torrent_response.json()
     return torrent_data
 
 # Function to create an embed message for a torrent
 def create_torrent_embed(torrent, result_index):
     embed = nextcord.Embed(
-        title=torrent['name'],
-        description=f"Torrent Link: {torrent['infohash']} \n Seeders: {torrent['seeders']} | Leechers: {torrent['leechers']}",
+        title=torrent.get('name', 'Unknown'),
+        description=(
+            f"Torrent Link: {torrent.get('infohash', 'N/A')}\n"
+            f"Seeders: {torrent.get('seeders', 'N/A')} | Leechers: {torrent.get('leechers', 'N/A')}"
+        ),
         color=0xE69138  # You can change the color as desired
     )
     # Set a different color for the first result
     if result_index == 0:
-        embed.color = 0x6AA84F  # Change this color to something else
+        embed.color = 0x6AA84F  # Highlight the first result
 
-    size_formatted = format_size(torrent['size_bytes'])
+    size_formatted = format_size(torrent.get('size_bytes', 0))
     embed.set_footer(text=size_formatted)
 
     return embed
 
+# Function to format size
 def format_size(size_bytes):
     if size_bytes == 0:
         return "0 B"
@@ -280,7 +292,7 @@ def format_size(size_bytes):
     p = math.pow(1024, i)
     size = round(size_bytes / p, 2)
     return f"{size} {size_name[i]}"
-
+    
 #------------------------- EVENTS -----------------------
 @client.event
 async def on_ready():
@@ -329,7 +341,7 @@ async def on_message(message):
             response = f"{keyword} really? Why don't you {random_data['activity'].lower()} instead?"
             await message.channel.send(response)
     
-    elif message.channel.id == 1194760253049425930:  # Replace with your actual channel ID
+    elif message.channel.id == 1328120241623924791:  # Replace with your actual channel ID
         history = await message.channel.history(limit=5).flatten()  # Adjust limit as needed
 
         # Concatenate previous messages with the current prompt
@@ -363,22 +375,33 @@ async def on_message(message):
 
 @client.command(brief="Search for torrents")
 async def tor(ctx, *, query):
-    num_results = 4  # Set the default number of results to 5
+    num_results = 5  # Set the default number of results to 5
 
     try:
+        # Fetch torrent data from the API
         torrent_data = get_torrents(query, num_results)
     except Exception as e:
-        # Handle the error here, and send an error message to the user
+        # Send an error message if something goes wrong
         await ctx.send(f"Sorry brotherman. Goddammit... I was trying to get you some torrents but the API is busy or smth: {e}\n\n Maybe try later? 😅")
         return
 
+    # Ensure `torrent_data` contains the key 'torrents' and is a list
+    torrents = torrent_data.get('torrents', [])
 
-    if not torrent_data:
+    # Check if any torrents were found
+    if not torrents:
         await ctx.send("Impressive. I found a total of 0 torrents for the given query. Maybe try a different thing?")
-    else:
-        for index, torrent in enumerate(torrent_data):
+        return
+
+    # Iterate through the first `num_results` torrents and send embeds
+    for index, torrent in enumerate(torrents[:num_results]):
+        try:
             embed = create_torrent_embed(torrent, index)
             await ctx.send(embed=embed)
+        except Exception as e:
+            await ctx.send(f"Oops, something went wrong when creating the embed for a torrent: {e}")
+
+
 
 @client.command()
 async def clear(ctx, num_messages: int):
